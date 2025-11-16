@@ -1,0 +1,129 @@
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+import { validationResult } from 'express-validator';
+
+dotenv.config();
+
+import User from "../../models/user.js";
+
+const imageURL = `${process.env.baseURL}uploads/users/`;
+
+
+// user registaration controller
+export const userRegister = async (req, res, next) => {
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ succes: false, message: 'Validation failed', error: errors.array()[0].msg });
+    }
+    try {
+        const { name, email, age, phoneNumber, password } = req.body;
+
+        const image = req.file ? req.file.filename : null;
+        const existingUser = await User.findOne({ $or: [{ email }, { phoneNumber }] });
+
+        if (existingUser) {
+            return res.status(400).json({ succes: false, message: 'registaration failed', error: "User with this email or phone number already exists." });
+        }
+        const becryptedPassword = await bcrypt.hash(password, 10);
+
+        const newUser = new User({
+            name,
+            email,
+            image,
+            age,
+            phoneNumber,
+            password: becryptedPassword,
+        });
+        const userData = await newUser.save();
+        const token = jwt.sign({ id: userData._id }, process.env.JWT_SECRET, {});
+        const data = {
+            id: userData._id,
+            name: userData.name,
+            email: userData.email,
+            image: `${imageURL + userData.image}`,
+            age: userData.age,
+            phoneNumber: userData.phoneNumber,
+            token: token
+
+        }
+        res.status(201).json({ succes: true, message: "User registered successfully", data });
+    } catch (error) {
+
+        console.log("Error registering user:", error);
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            error: error.message,
+        });
+    }
+};
+
+//user login controller with email and password
+export const userLogin = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ succes: false, message: 'Validation failed', error: errors.array()[0].msg });
+    }
+    try {
+        const { email, password } = req.body;
+        const existingUser = await User.findOne({ email });
+
+        if (!existingUser) {
+            return res.status(400).json({ succes: false, message: 'Login failed', error: "Invalid email or password." });
+        }
+        const isPasswordValid = await bcrypt.compare(password, existingUser.password);
+        if (!isPasswordValid) {
+            return res.status(400).json({ succes: false, message: 'Login failed', error: "Invalid email or password." });
+
+        }
+        const token = jwt.sign({ id: existingUser._id }, process.env.JWT_SECRET, {});
+        const data = {
+            id: existingUser._id,
+            name: existingUser.name,
+            email: existingUser.email,
+            image: `${imageURL + existingUser.image}`,
+            age: existingUser.age,
+            phoneNumber: existingUser.phoneNumber,
+            token: token
+        }
+        res.status(200).json({ succes: true, message: "User logged in successfully", data });
+    } catch (error) {
+        console.error("Error logging in user:", error);
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            error: error.message,
+        });
+    }
+};
+
+
+//user profile controller
+export const userProfile = async (req, res) => {
+    try {
+        const { userId } = req.params;
+        const userData = await User.findById(userId).select('-password');
+        if (!userData) {
+            return res.status(404).json({ succes: false, message: 'Get user profile failed', error: "User not found." });
+        }
+        const data = {
+            id: userData._id,
+            name: userData.name,
+            email: userData.email,
+            image: `${imageURL + userData.image}`,
+            age: userData.age,
+            phoneNumber: userData.phoneNumber,
+
+        }
+        res.status(200).json({ succes: true, message: "User profile fetched successfully", data });
+    } catch (error) {
+        console.error("Error fetching user profile:", error);
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            error: error.message,
+        });
+    }
+};
