@@ -7,7 +7,7 @@ dotenv.config();
 
 import User from "../../models/user.js";
 
-const imageURL = `${process.env.baseURL}uploads/users/`;
+const imageURL = `${process.env.baseURL}/uploads/users/`;
 
 
 // user registaration controller
