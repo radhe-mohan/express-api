@@ -2,10 +2,10 @@ import { Router } from "express";
 import { body } from "express-validator";
 
 import { userLogin, userProfile, userRegister } from "../controller.js/userRegister.js";
-import { singleUpload } from "../../middleware/multer.js";
+import { singleUpload, singleUpload_s3 } from "../../middleware/multer.js";
 
 const router = Router();
-router.post("/register", singleUpload("./public/uploads/users", "image"), [
+router.post("/register", singleUpload_s3("uploads/users/", "image"), [
     body('name').notEmpty().withMessage('Name is required'),
     body('email').isEmail().withMessage('Valid email is required'),
     body('age').isInt({ min: 0 }).withMessage('Valid age is required'),

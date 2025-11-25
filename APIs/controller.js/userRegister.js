@@ -20,7 +20,7 @@ export const userRegister = async (req, res, next) => {
     try {
         const { name, email, age, phoneNumber, password } = req.body;
 
-        const image = req.file ? req.file.filename : null;
+        const image = req.file.location;
         const existingUser = await User.findOne({ $or: [{ email }, { phoneNumber }] });
 
         if (existingUser) {
@@ -42,7 +42,8 @@ export const userRegister = async (req, res, next) => {
             id: userData._id,
             name: userData.name,
             email: userData.email,
-            image: `${imageURL + userData.image}`,
+            // image: `${imageURL + userData.image}`,
+            image: userData.image,
             age: userData.age,
             phoneNumber: userData.phoneNumber,
             token: token
@@ -83,7 +84,8 @@ export const userLogin = async (req, res) => {
             id: existingUser._id,
             name: existingUser.name,
             email: existingUser.email,
-            image: `${imageURL + existingUser.image}`,
+            // image: `${imageURL + existingUser.image}`,
+            image: image,
             age: existingUser.age,
             phoneNumber: existingUser.phoneNumber,
             token: token
@@ -112,7 +114,7 @@ export const userProfile = async (req, res) => {
             id: userData._id,
             name: userData.name,
             email: userData.email,
-            image: `${imageURL + userData.image}`,
+            image: image,
             age: userData.age,
             phoneNumber: userData.phoneNumber,
 
