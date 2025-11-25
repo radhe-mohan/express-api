@@ -85,7 +85,7 @@ export const userLogin = async (req, res) => {
             name: existingUser.name,
             email: existingUser.email,
             // image: `${imageURL + existingUser.image}`,
-            image: image,
+            image: existingUser.image,
             age: existingUser.age,
             phoneNumber: existingUser.phoneNumber,
             token: token
@@ -114,7 +114,7 @@ export const userProfile = async (req, res) => {
             id: userData._id,
             name: userData.name,
             email: userData.email,
-            image: image,
+            image: existingUser.image,
             age: userData.age,
             phoneNumber: userData.phoneNumber,
 
