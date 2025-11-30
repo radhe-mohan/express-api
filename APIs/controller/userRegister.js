@@ -121,7 +121,7 @@ export const userProfile = async (req, res) => {
             id: userData._id,
             name: userData.name,
             email: userData.email,
-            image: existingUser.image,
+            image: userData.image,
             age: userData.age,
             phoneNumber: userData.phoneNumber,
 
