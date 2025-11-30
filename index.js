@@ -1,6 +1,5 @@
 import express from 'express'
 import mongoose from 'mongoose';
-import { errorHandler } from './middleware/errorHandler.js';
 const app = express();
 
 import env from 'dotenv';
@@ -22,7 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static('public/uploads'));
 //import routers
 // user routes
-import userRoutes from './APIs/route.js/userRegister.js';
+import userRoutes from './APIs/route/userRegister.js';
 
 
 
